@@ -7,9 +7,9 @@ import pickle
 
 X_PTS = 6
 Y_PTS = 8
+cam_owner = "G" # L for lindsey, G for graham
 
-
-def grab_calib_pics(camera = 1):
+def grab_calib_pics(camera = 2):
     """Walks through getting callibration matrix for a camera"""
 
     cap = cv2.VideoCapture(camera)
@@ -23,7 +23,7 @@ def grab_calib_pics(camera = 1):
                 break
         gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
         ret, corners = cv2.findChessboardCorners(gray, (Y_PTS, X_PTS), None)
-        if corners:
+        if not corners == None:
             for corner in corners[:, 0, :]:
                 cv2.circle(gray, (int(corner[0]), int(corner[1])),
                           10, [0, 0, 255], 2)
@@ -31,17 +31,20 @@ def grab_calib_pics(camera = 1):
             cv2.waitKey(0)
             cv2.destroyWindow('gray')
             if ret:
-                cv2.imwrite('../images/img_%d.jpg' %good, frame)
+                cv2.imwrite('../images/chessboard_%s/img_%d.jpg'
+                            %(cam_owner, good), frame)
                 print "I just wrote img_%d" %good
                 good +=1
+            else:
+                print "Image was BAD, was not saved"
         else:
             print "Image was BAD, corners weren't detected"
 
 
 def calibrate_from_chessboard():
     """
-    Assumes that there are at least ten jpg images of the chessboard callibration rig 
-    from different views and that these are the only jpg images in this folder
+    Assumes that there are at least ten jpg images of the chessboard
+    calibration rig from different views
 
     returns:
     Camera matrix (intrinsic camera parameters)
@@ -55,7 +58,7 @@ def calibrate_from_chessboard():
     objpoints = [] # 3d point in real world space
     imgpoints = [] # 2d points in image plane.
     
-    images = glob('../images/img_*.jpg')
+    images = glob('../images/chessboard_%s/img_*.jpg' %cam_owner)
     
     if images:
         for fname in images:    
@@ -77,7 +80,7 @@ def calibrate_from_chessboard():
 
 def check_calibration(mtx, dist):
     alpha = 0
-    images = glob('../images/img_*.jpg')
+    images = glob('../images/chessboard_%s/img_*.jpg' %cam_owner)
     for fname in images:
         img = cv2.imread(fname)
         h,  w = img.shape[:2]
@@ -104,7 +107,7 @@ if __name__ == '__main__':
         mtx, dist, rvecs, tvecs = calibrate_from_chessboard()
         c = raw_input('Do you want to save the camera matrix? (y/n) ')
         if c[0] == 'y':
-            fname = raw_input('What camera are you saving? (e.g. lindsey_cam)')
+            fname = raw_input('What camera are you saving? (e.g. lindsey_cam) ')
             pickle.dump([mtx, dist], open('../cameras/%s.p'%fname, 'wb'))
         c = raw_input('Do you want to check the pics undistorted? (y/n) ')
         if c[0] == 'y':
