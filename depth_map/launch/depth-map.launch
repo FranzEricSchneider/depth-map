@@ -1,0 +1,4 @@
+<launch>
+  <!-- Publishing ROS image -->
+  <node name="image_node" pkg="depth-map" type="image_node.py" output="screen"/>
+</launch>
