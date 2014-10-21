@@ -10,12 +10,16 @@ class ImageConverter(object):
   def __init__(self):
     self.image_pub = rospy.Publisher("video_topic", Image, queue_size=10)
     self.bridge = CvBridge()
-    self.cap = cv2.VideoCapture(0)
+    self.cap = cv2.VideoCapture(2)
 
   def read_frame(self):
-    return_val, frame = self.cap.read()
-    cv2.imshow('frame', frame)
-    return frame
+    try:
+      return_val, frame = self.cap.read()
+      cv2.imshow('frame', frame)
+      return frame
+    except:
+      print "Error while reading"
+      return None
     
   def publish_ros_img(self, frame):
     try:

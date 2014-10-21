@@ -37,6 +37,7 @@ def grab_calib_pics(camera = 1):
         else:
             print "Image was BAD, corners weren't detected"
 
+
 def calibrate_from_chessboard():
     """
     Assumes that there are at least ten jpg images of the chessboard callibration rig 
