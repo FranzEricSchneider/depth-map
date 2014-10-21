@@ -17,7 +17,7 @@ class ImageConverter(object):
     cv2.imshow('frame', frame)
     return frame
     
-  def publish_ros_img(self, frame)
+  def publish_ros_img(self, frame):
     try:
       rosimg = self.bridge.cv2_to_imgmsg(frame, "bgr8")
       self.image_pub.publish(rosimg)
