@@ -9,8 +9,8 @@ corner_threshold = 0.02
 # K = np.array( [[651.38582, 0.0, 327.26766], [0.0, 650.2441, 242.38098],[ 0.0, 0.0, 1.0]])
 
 # From our camera_calibration pickles
-lindsey_cam = pickle.load( open( ' ../cameras/lindsey_cam.p' , ' rb'  ) )
-graham_cam = pickle.load( open( ' ../cameras/graham_cam.p' , ' rb'  ) )
+lindsey_cam = pickle.load( open( '../cameras/lindsey_cam.p' , 'rb'  ) )
+graham_cam = pickle.load( open( '../cameras/graham_cam.p' , 'rb'  ) )
 D = lindsey_cam[1]
 print 'D: \n', D
 K = lindsey_cam[0]
@@ -250,14 +250,19 @@ if __name__ == '__main__':
     for P1 in P1_possibilities:
         pclouds.append(triangulate_points(im1_pts_ud_fixed, im2_pts_ud_fixed,
                                           P, P1))
+    # What specifically is in pclouds[0]? Are they 3D? 2D? Which camera are
+    # they from?
 
     infront_of_camera = []
     for i in range(len(P1_possibilities)):
         infront_of_camera.append(test_triangulation(P, pclouds[i]) + 
                                  test_triangulation(P1_possibilities[i],
                                  pclouds[i]))
-
     best_pcloud_idx = np.argmax(infront_of_camera)
+    
+    print 'P1_possibilities[best_pcloud_idx]'
+    print P1_possibilities[best_pcloud_idx]
+
     if not(extract_automatic_matches):
         best_pcloud = pclouds[best_pcloud_idx]
     else:
