@@ -25,12 +25,17 @@ colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255),
 pt_num = 0
 im1_pts = []
 im2_pts = []
-im1name = 'img_38.jpg'
+im1name = 'img_10.jpg'
 im2name = 'img_39.jpg'
 
 
 # Q: What is P and P1?
+    # P is P0 (camera matrix for the first camera, which is a unit R, t)
+    # P1 is the camera matrix with 9 elements of rotation and 3 of translation
+    # (3x4 matrix). The translation only gives us direction information.
 # Q: What is all of this inhomogenous stuff?
+    # Inhomogeneous just means the last vector value is stripped off and the
+    # other points are scaled by that value
 def triangulate_points(pt_set1, pt_set2, P, P1):
     my_points = cv2.triangulatePoints(P, P1, pt_set1.T, pt_set2.T)
     projected_points_1 = P.dot(my_points)
@@ -185,10 +190,15 @@ if __name__ == '__main__':
         # EXAMINE
 
     # Q: What is im1_pts_augmented?
+        # Hypothesis: we have a 2D vector and need to make it 3D with an empty
+        # 3rd axis to pass into undistortPoints
     im1_pts_augmented = np.zeros((1, im1_pts.shape[0], im1_pts.shape[1]))
     im1_pts_augmented[0, :, :] = im1_pts
     im2_pts_augmented = np.zeros((1, im2_pts.shape[0], im2_pts.shape[1]))
     im2_pts_augmented[0, :, :] = im2_pts
+
+    # print "im1_pts_augmented"
+    # print im1_pts_augmented
 
     im1_pts_ud = cv2.undistortPoints(im1_pts_augmented, K, D)
     im2_pts_ud = cv2.undistortPoints(im2_pts_augmented, K, D)
@@ -198,6 +208,9 @@ if __name__ == '__main__':
                                      0.5 * 10 ** -3)
 
     # Q: Why do we correct this?
+        # We got a bunch of correspondences w/o reference to the fundamental
+        # matrix. Now that we have F we can make sure all of the correspondences
+        # match F by having correct slope, for example
     im1_pts_ud_fixed, im2_pts_ud_fixed = cv2.correctMatches(E, im1_pts_ud,
                                                             im2_pts_ud)
     # EXAMINE
@@ -215,6 +228,8 @@ if __name__ == '__main__':
     F = np.linalg.inv(K.T).dot(E).dot(np.linalg.inv(K))
     
     # Q: Paper: What are all of these guys for?
+        # R stands for rotation and t stands for translation, which can be
+        # extracted from SVD on E (doesn't need to be understood)
     U, Sigma, V = np.linalg.svd(E)
     R1 = U.dot(W).dot(V)
     R2 = U.dot(W.T).dot(V)
@@ -228,11 +243,14 @@ if __name__ == '__main__':
         R1 = U.dot(W).dot(V)
         R2 = U.dot(W.T).dot(V)
 
-    # What is t1?
+    # Q: What is t1?
+        # R stands for rotation and t stands for translation, which can be
+        # extracted from SVD on E (doesn't need to be understood)
     t1 = U[:,2]
     t2 = -U[:,2]
 
     # Q: Paper: What is P for?
+        # P can be thought of as P0, it is the camera matrix for the first cam
     P = np.array([[1.0, 0.0, 0.0, 0.0],
                   [0.0, 1.0, 0.0, 0.0],
                   [0.0, 0.0, 1.0, 0.0]]);
@@ -250,8 +268,10 @@ if __name__ == '__main__':
     for P1 in P1_possibilities:
         pclouds.append(triangulate_points(im1_pts_ud_fixed, im2_pts_ud_fixed,
                                           P, P1))
-    # What specifically is in pclouds[0]? Are they 3D? 2D? Which camera are
+    # Q: What specifically is in pclouds[i]? Are they 3D? 2D? Which camera are
     # they from?
+        # Hypothesis: pclouds[i] is a list of 3D points that was made from 2
+        # lists of 2D points
 
     infront_of_camera = []
     for i in range(len(P1_possibilities)):
@@ -260,8 +280,8 @@ if __name__ == '__main__':
                                  pclouds[i]))
     best_pcloud_idx = np.argmax(infront_of_camera)
     
-    print 'P1_possibilities[best_pcloud_idx]'
-    print P1_possibilities[best_pcloud_idx]
+    # print 'P1_possibilities[best_pcloud_idx]'
+    # print P1_possibilities[best_pcloud_idx]
 
     if not(extract_automatic_matches):
         best_pcloud = pclouds[best_pcloud_idx]
