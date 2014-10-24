@@ -110,20 +110,23 @@ if __name__ == '__main__':
         im2_pts[i,0] = correspondences[1][i][0]
         im2_pts[i,1] = correspondences[1][i][1]
 
-        cv2.circle(im,(int(im1_pts[i,0]),int(im1_pts[i,1])),2,(255,0,0),2)
-        cv2.circle(im,(int(im2_pts[i,0]+im1.shape[1]),int(im2_pts[i,1])),2,(255,0,0),2)
+        cv2.circle(im, (int(im1_pts[i, 0]), int(im1_pts[i, 1])), 2,
+                   (255, 0, 0), 2)
+        cv2.circle(im, (int(im2_pts[i, 0] + im1.shape[1]), int(im2_pts[i, 1])),
+                   2, (255, 0, 0), 2)
 
-    im1_pts_augmented = np.zeros((1,im1_pts.shape[0],im1_pts.shape[1]))
-    im1_pts_augmented[0,:,:] = im1_pts
-    im2_pts_augmented = np.zeros((1,im2_pts.shape[0],im2_pts.shape[1]))
-    im2_pts_augmented[0,:,:] = im2_pts
+    im1_pts_augmented = np.zeros((1, im1_pts.shape[0], im1_pts.shape[1]))
+    im1_pts_augmented[0, :, :] = im1_pts
+    im2_pts_augmented = np.zeros((1, im2_pts.shape[0], im2_pts.shape[1]))
+    im2_pts_augmented[0, :, :] = im2_pts
 
-    im1_pts_ud = cv2.undistortPoints(im1_pts_augmented,K,D)
-    im2_pts_ud = cv2.undistortPoints(im2_pts_augmented,K,D)
+    im1_pts_ud = cv2.undistortPoints(im1_pts_augmented, K, D)
+    im2_pts_ud = cv2.undistortPoints(im2_pts_augmented, K, D)
 
-    E, mask = cv2.findFundamentalMat(im1_pts_ud,im2_pts_ud,cv2.FM_RANSAC)
+    E, mask = cv2.findFundamentalMat(im1_pts_ud, im2_pts_ud, cv2.FM_RANSAC)
 
-    im1_pts_ud_fixed, im2_pts_ud_fixed = cv2.correctMatches(E, im1_pts_ud, im2_pts_ud)
+    im1_pts_ud_fixed, im2_pts_ud_fixed = cv2.correctMatches(E, im1_pts_ud,
+                                                            im2_pts_ud)
     use_corrected_matches = True
     if not(use_corrected_matches):
         im1_pts_ud_fixed = im1_pts_ud
@@ -131,7 +134,8 @@ if __name__ == '__main__':
 
     epipolar_error = np.zeros((im1_pts_ud_fixed.shape[1],))
     for i in range(im1_pts_ud_fixed.shape[1]):
-        epipolar_error[i] = test_epipolar(E,im1_pts_ud_fixed[0,i,:],im2_pts_ud_fixed[0,i,:])
+        epipolar_error[i] = test_epipolar(E, im1_pts_ud_fixed[0, i, :],
+                                          im2_pts_ud_fixed[0, i, :])
 
     F = np.linalg.inv(K.T).dot(E).dot(np.linalg.inv(K))
     U, Sigma, V = np.linalg.svd(E)
@@ -139,7 +143,7 @@ if __name__ == '__main__':
     R1 = U.dot(W).dot(V)
     R2 = U.dot(W.T).dot(V)
 
-    if np.linalg.det(R1)+1.0 < 10**-8:
+    if np.linalg.det(R1) + 1.0 < 10 ** -8:
         # flip sign of E and recompute everything
         E = -E
         F = np.linalg.inv(K.T).dot(E).dot(np.linalg.inv(K))
@@ -148,25 +152,28 @@ if __name__ == '__main__':
         R1 = U.dot(W).dot(V)
         R2 = U.dot(W.T).dot(V)
 
-    t1 = U[:,2]
-    t2 = -U[:,2]
+    t1 = U[:, 2]
+    t2 = -U[:, 2]
 
     P = np.array([[1.0, 0.0, 0.0, 0.0],
                   [0.0, 1.0, 0.0, 0.0],
                   [0.0, 0.0, 1.0, 0.0]]);
     P1_possibilities = []
-    P1_possibilities.append(np.column_stack((R1,t1)))
-    P1_possibilities.append(np.column_stack((R1,t2)))
-    P1_possibilities.append(np.column_stack((R2,t1)))
-    P1_possibilities.append(np.column_stack((R2,t2)))
+    P1_possibilities.append(np.column_stack((R1, t1)))
+    P1_possibilities.append(np.column_stack((R1, t2)))
+    P1_possibilities.append(np.column_stack((R2, t1)))
+    P1_possibilities.append(np.column_stack((R2, t2)))
 
     pclouds = []
     for P1 in P1_possibilities:
-        pclouds.append(triangulate_points(im1_pts_ud_fixed, im2_pts_ud_fixed, P, P1))
+        pclouds.append(triangulate_points(im1_pts_ud_fixed, im2_pts_ud_fixed,
+                                          P, P1))
 
     infront_of_camera = []
     for i in range(len(P1_possibilities)):
-        infront_of_camera.append(test_triangulation(P,pclouds[i])+test_triangulation(P1_possibilities[i],pclouds[i]))
+        infront_of_camera.append(test_triangulation(P, pclouds[i]) + 
+                                 test_triangulation(P1_possibilities[i],
+                                 pclouds[i]))
 
     best_pcloud = pclouds[np.argmax(infront_of_camera)]
     depths = best_pcloud[:,2] - min(best_pcloud[:,2])
@@ -175,7 +182,8 @@ if __name__ == '__main__':
     print depths
 
     for i in range(best_pcloud.shape[0]):
-        cv2.circle(im,(int(im1_pts[i,0]),int(im1_pts[i,1])),int(max(1.0,depths[i]*20.0)),(0,255,0),1)
+        cv2.circle(im, (int(im1_pts[i, 0]), int(im1_pts[i, 1])),
+                   int(max(1.0, depths[i] * 20.0)), (0, 255, 0), 1)
 
     cv2.imshow("MYWIN",im)
     cv2.setMouseCallback("MYWIN",mouse_event,im)
