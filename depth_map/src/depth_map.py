@@ -131,8 +131,8 @@ class DepthMap(object):
         auto_pts2_orig = auto_pts2
 
         # remove the effect of the intrinsic parameters as well as radial distortion
-        auto_pts1 = cv2.undistortPoints(auto_pts1, K, D)
-        auto_pts2 = cv2.undistortPoints(auto_pts2, K, D)
+        auto_pts1 = cv2.undistortPoints(auto_pts1, self.K, self.D)
+        auto_pts2 = cv2.undistortPoints(auto_pts2, self.K, self.D)
 
         correspondences = [[],[]]
         for i in range(auto_pts1_orig.shape[1]):
@@ -157,11 +157,11 @@ class DepthMap(object):
             cv2.circle(im,(int(im2_pts[i,0]+im1.shape[1]),int(im2_pts[i,1])),2,(255,0,0),2)
 
         # the np.array bit makes the points into a 1xn_pointsx2 numpy array since that is what undistortPoints requires
-        im1_pts_ud = cv2.undistortPoints(np.array([im1_pts]),K,D)
-        im2_pts_ud = cv2.undistortPoints(np.array([im2_pts]),K,D)
+        im1_pts_ud = cv2.undistortPoints(np.array([im1_pts]),self.K,self.D)
+        im2_pts_ud = cv2.undistortPoints(np.array([im2_pts]),self.K,self.D)
 
         # since we are using undistorted points we are really computing the essential matrix
-        self.E, mask = cv2.findFundamentalMat(im1_pts_ud,im2_pts_ud,cv2.FM_RANSAC,epipolar_threshold)
+        self.E, mask = cv2.findFundamentalMat(im1_pts_ud,im2_pts_ud,cv2.FM_RANSAC,self.epipolar_threshold)
 
         # correct matches using the optimal triangulation method of Hartley and Zisserman
         im1_pts_ud_fixed, im2_pts_ud_fixed = cv2.correctMatches(self.E, im1_pts_ud, im2_pts_ud)
@@ -171,7 +171,7 @@ class DepthMap(object):
             epipolar_error[i] = test_epipolar(self.E,im1_pts_ud_fixed[0,i,:],im2_pts_ud_fixed[0,i,:])
 
         # since we used undistorted points to compute F we really computed E, now we use E to get F
-        self.F = np.linalg.inv(K.T).dot(self.E).dot(np.linalg.inv(K))
+        self.F = np.linalg.inv(K.T).dot(self.E).dot(np.linalg.inv(self.K))
         U, Sigma, V = np.linalg.svd(self.E)
 
         # these are the two possible rotations
@@ -182,11 +182,11 @@ class DepthMap(object):
         if np.linalg.det(R1)+1.0 < 10**-8:
             # flip sign of E and recompute everything
             self.E = -self.E
-            self.F = np.linalg.inv(K.T).dot(self.E).dot(np.linalg.inv(K))
+            self.F = np.linalg.inv(self.K.T).dot(self.E).dot(np.linalg.inv(self.K))
             U, Sigma, V = np.linalg.svd(self.E)
 
-            R1 = U.dot(W).dot(V)
-            R2 = U.dot(W.T).dot(V)
+            R1 = U.dot(self.W).dot(V)
+            R2 = U.dot(self.W.T).dot(V)
 
         # these are the two possible translations between the two cameras (up to a scale)
         t1 = U[:,2]
