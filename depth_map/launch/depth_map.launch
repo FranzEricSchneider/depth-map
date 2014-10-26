@@ -1,4 +1,7 @@
 <launch>
+	<node pkg="tf" type="static_transform_publisher" name="map_to_points" 
+    args="0 0 0 0 0 0 map points 50" />
+
   <!-- Publishing ROS image -->
   <node name="image_node" pkg="depth_map" type="image_node.py" output="screen"/>
 </launch>
