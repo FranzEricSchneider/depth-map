@@ -1,6 +1,4 @@
 <launch>
-  
-
   <!-- Running the point cloud publisher -->
   <node name="test_ROS_pcl" pkg="depth_map" type="test_ROS_pcl.py" output="screen"/>
 </launch>

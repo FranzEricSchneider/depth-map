@@ -1,8 +1,14 @@
-2#!/usr/bin/env python
+#!/usr/bin/env python
+import rospy
 import cv2
 import pickle
 import numpy as np
 from math import exp
+
+import tf
+from sensor_msgs.msg import PointCloud
+from std_msgs.msg import Header
+from geometry_msgs.msg import Point32
 
 # Code adopted from https://github.com/paulruvolo/comprobo2014/blob/master/exercises/epipolar_geometry/show_depth_auto.py
 
@@ -51,6 +57,10 @@ class DepthMap(object):
         self.P = np.array([[1.0, 0.0, 0.0, 0.0],
                           [0.0, 1.0, 0.0, 0.0],
                           [0.0, 0.0, 1.0, 0.0]])
+
+        rospy.init_node('depth_publisher')
+        self.tf_broadcaster = tf.TransformBroadcaster()
+        self.point_pub = rospy.Publisher('points', PointCloud, queue_size=10)
 
     def triangulate_points(self, pt_set1, pt_set2, P1):
         my_points = cv2.triangulatePoints(self.P, P1, pt_set1.T, pt_set2.T)
@@ -240,6 +250,22 @@ class DepthMap(object):
 
         return best_pcloud, depths, im1_pts, im2_pts
 
+    def publish_points(self, pcloud, seq):
+        pc = PointCloud()
+        pc.header = Header(seq, rospy.Time.now(), 'points')
+        for i in range(len(pcloud[:, 0])):
+            # Publishing as (z, x, y) b/c of the way that Z is forward in
+            # triangulation
+            pc.points.append(Point32(pcloud[i, 2],
+                                     pcloud[i, 0],
+                                     pcloud[i, 1]))
+        self.point_pub.publish(pc)
+        self.tf_broadcaster.sendTransform((0, 0, 0),
+                 tf.transformations.quaternion_from_euler(0, 0, 0),
+                 rospy.Time.now(),
+                 'points',
+                 'map')
+
     def set_corner_threshold(self, thresh):
         """ Sets the threshold to consider an interest point a corner.  The higher the value
             the more the point must look like a corner to be considered """
@@ -282,18 +308,21 @@ class DepthMap(object):
                            self.set_epipolar_threshold)
 
         print "hit spacebar to recompute depths"
-        cv2.imshow("MyWindow", im)
+        counter = 0
         while True:
             for i in range(best_pcloud.shape[0]):
                 cv2.circle(im, (int(im1_pts[i, 0]), int(im1_pts[i, 1])),
                            int(max(1.0, depths[i] * 20.0)), (0, 255, 0), 1)
 
             cv2.imshow("MyWindow", im)
+            self.publish_points(best_pcloud, counter)
+
             key = cv2.waitKey(50)
             if key != -1 and chr(key) == ' ':
                 best_pcloud, depths, im1_pts, im2_pts = self.compute_depths(im1, im2, im2_bw)
             if key & 0xFF == ord('q'):
                 break
+            counter += 1
 
         cv2.destroyAllWindows()
 
