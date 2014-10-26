@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+2#!/usr/bin/env python
 import cv2
 import pickle
 import numpy as np
@@ -10,7 +10,7 @@ from math import exp
 
 class DepthMap(object):
     """DepthMap! Not a death map."""
-    def __init__(self, cam, img1, img2):
+    def __init__(self, cam_path, img1_path, img2_path):
         """
         Creates a depth map object! dundundun.
 
@@ -22,7 +22,13 @@ class DepthMap(object):
         """
         super(DepthMap, self).__init__()
 
-        self.cam = pickle.load( open( cam , 'rb'  ) )
+        self.detector = cv2.FeatureDetector_create('SIFT')
+        self.extractor = cv2.DescriptorExtractor_create('SIFT')
+        self.matcher = cv2.BFMatcher()
+
+        self.img1_path = img1_path
+        self.img2_path = img2_path
+        cam = pickle.load( open( cam_path , 'rb'  ) )
         self.D = cam[1]
         self.K = cam[0]
         self.W = np.array([[0.0, -1.0, 0.0],
@@ -41,9 +47,14 @@ class DepthMap(object):
         self.F = np.zeros([3,4])
         self.E = np.zeros([3,4])
 
-    def triangulate_points(self, pt_set1, pt_set2, P, P1):
-        my_points = cv2.triangulatePoints(P,P1,pt_set1.T,pt_set2.T)
-        projected_points_1 = P.dot(my_points)
+        # the first camera has a camera matrix with no translation or rotation
+        self.P = np.array([[1.0, 0.0, 0.0, 0.0],
+                          [0.0, 1.0, 0.0, 0.0],
+                          [0.0, 0.0, 1.0, 0.0]])
+
+    def triangulate_points(self, pt_set1, pt_set2, P1):
+        my_points = cv2.triangulatePoints(self.P, P1, pt_set1.T, pt_set2.T)
+        projected_points_1 = self.P.dot(my_points)
         
         # convert to inhomogeneous coordinates
         for i in range(projected_points_1.shape[1]):
@@ -67,7 +78,7 @@ class DepthMap(object):
 
         return my_points.T
 
-    def test_epipolar(pt1,pt2):
+    def test_epipolar(self, pt1, pt2):
         pt1_h = np.zeros((3,1))
         pt2_h = np.zeros((3,1))
         pt1_h[0:2,0] = pt1.T
@@ -76,14 +87,14 @@ class DepthMap(object):
         pt2_h[2] = 1.0
         return pt2_h.T.dot(self.E).dot(pt1_h)
 
-    def test_triangulation(P,pcloud):
+    def test_triangulation(self, P, pcloud):
         P4x4 = np.eye(4)
-        P4x4[0:3,:] = P
+        P4x4[0:3, :] = P
         pcloud_3d = pcloud[:,0:3]
         projected = cv2.perspectiveTransform(np.array([pcloud_3d]),P4x4)
         return np.mean(projected[0,:,2]>0.0)
 
-    def mouse_event(event,x,y,flag,dc):
+    def mouse_event(self, event, x, y, flag, dc):
         if event == cv2.EVENT_FLAG_LBUTTON:
             if x < im.shape[1]/2.0:
                 l = self.F.dot(np.array([x,y,1.0]))
@@ -95,37 +106,41 @@ class DepthMap(object):
                 # plot the epipolar line
                 cv2.line(im,(int(im.shape[1]/2.0),int(y_for_x_min)),(int(im.shape[1]-1.0),int(y_for_x_max)),(255,0,0))
 
-    def compute_depths():
+    def compute_depths(self, im1, im2, im1_bw, im2_bw):
         global im
-        kp1 = detector.detect(im1_bw)
-        kp2 = detector.detect(im2_bw)
 
-        dc, des1 = extractor.compute(im1_bw,kp1)
-        dc, des2 = extractor.compute(im2_bw,kp2)
+        kp1 = self.detector.detect(im1_bw)
+        kp2 = self.detector.detect(im2_bw)
+
+        dc, des1 = self.extractor.compute(im1_bw, kp1)
+        dc, des2 = self.extractor.compute(im2_bw, kp2)
 
         # do matches both ways so we can better screen out spurious matches
-        matches = matcher.knnMatch(des1,des2,k=2)
-        matches_reversed = matcher.knnMatch(des2,des1,k=2)
+        matches = self.matcher.knnMatch(des1, des2, k = 2)
+        matches_reversed = self.matcher.knnMatch(des2, des1, k = 2)
 
         # apply the ratio test in one direction
         good_matches_prelim = []
         for m,n in matches:
-            if m.distance < ratio_threshold*n.distance and kp1[m.queryIdx].response > corner_threshold and kp2[m.trainIdx].response > corner_threshold:
+            if m.distance < self.ratio_threshold * n.distance and \
+               kp1[m.queryIdx].response > self.corner_threshold and \
+               kp2[m.trainIdx].response > self.corner_threshold:
                 good_matches_prelim.append((m.queryIdx, m.trainIdx))
 
         # apply the ratio test in the other direction
         good_matches = []
         for m,n in matches_reversed:
-            if m.distance < ratio_threshold*n.distance and (m.trainIdx,m.queryIdx) in good_matches_prelim:
+            if m.distance < self.ratio_threshold * n.distance and \
+               (m.trainIdx, m.queryIdx) in good_matches_prelim:
                 good_matches.append((m.trainIdx, m.queryIdx))
 
-        auto_pts1 = np.zeros((1,len(good_matches),2))
-        auto_pts2 = np.zeros((1,len(good_matches),2))
+        auto_pts1 = np.zeros((1, len(good_matches), 2))
+        auto_pts2 = np.zeros((1, len(good_matches), 2))
 
         for idx in range(len(good_matches)):
             match = good_matches[idx]
-            auto_pts1[0,idx,:] = kp1[match[0]].pt
-            auto_pts2[0,idx,:] = kp2[match[1]].pt
+            auto_pts1[0, idx, :] = kp1[match[0]].pt
+            auto_pts2[0, idx, :] = kp2[match[1]].pt
 
         auto_pts1_orig = auto_pts1
         auto_pts2_orig = auto_pts2
@@ -144,7 +159,7 @@ class DepthMap(object):
         im2_pts = np.zeros((len(correspondences[1]),2))
 
         # usage of global im
-        im = np.array(np.hstack((im1,im2)))
+        im = np.array(np.hstack((im1, im2)))
 
         # plot the points
         for i in range(len(im1_pts)):
@@ -153,30 +168,37 @@ class DepthMap(object):
             im2_pts[i,0] = correspondences[1][i][0]
             im2_pts[i,1] = correspondences[1][i][1]
 
-            cv2.circle(im,(int(im1_pts[i,0]),int(im1_pts[i,1])),2,(255,0,0),2)
-            cv2.circle(im,(int(im2_pts[i,0]+im1.shape[1]),int(im2_pts[i,1])),2,(255,0,0),2)
+            cv2.circle(im, (int(im1_pts[i, 0]), int(im1_pts[i, 1])), 2,
+                       (255, 0, 0), 2)
+            cv2.circle(im, (int(im2_pts[i, 0] + im1.shape[1]),
+                       int(im2_pts[i, 1])), 2, (255, 0, 0), 2)
 
         # the np.array bit makes the points into a 1xn_pointsx2 numpy array since that is what undistortPoints requires
         im1_pts_ud = cv2.undistortPoints(np.array([im1_pts]),self.K,self.D)
         im2_pts_ud = cv2.undistortPoints(np.array([im2_pts]),self.K,self.D)
 
         # since we are using undistorted points we are really computing the essential matrix
-        self.E, mask = cv2.findFundamentalMat(im1_pts_ud,im2_pts_ud,cv2.FM_RANSAC,self.epipolar_threshold)
+        self.E, mask = cv2.findFundamentalMat(im1_pts_ud, im2_pts_ud,
+                                              cv2.FM_RANSAC,
+                                              self.epipolar_threshold)
 
         # correct matches using the optimal triangulation method of Hartley and Zisserman
-        im1_pts_ud_fixed, im2_pts_ud_fixed = cv2.correctMatches(self.E, im1_pts_ud, im2_pts_ud)
+        im1_pts_ud_fixed, im2_pts_ud_fixed = cv2.correctMatches(self.E,
+                                                                im1_pts_ud,
+                                                                im2_pts_ud)
 
         epipolar_error = np.zeros((im1_pts_ud_fixed.shape[1],))
         for i in range(im1_pts_ud_fixed.shape[1]):
-            epipolar_error[i] = test_epipolar(self.E,im1_pts_ud_fixed[0,i,:],im2_pts_ud_fixed[0,i,:])
+            epipolar_error[i] = self.test_epipolar(im1_pts_ud_fixed[0, i, :],
+                                                   im2_pts_ud_fixed[0, i, :])
 
         # since we used undistorted points to compute F we really computed E, now we use E to get F
-        self.F = np.linalg.inv(K.T).dot(self.E).dot(np.linalg.inv(self.K))
+        self.F = np.linalg.inv(self.K.T).dot(self.E).dot(np.linalg.inv(self.K))
         U, Sigma, V = np.linalg.svd(self.E)
 
         # these are the two possible rotations
-        R1 = U.dot(W).dot(V)
-        R2 = U.dot(W.T).dot(V)
+        R1 = U.dot(self.W).dot(V)
+        R2 = U.dot(self.W.T).dot(V)
 
         # flip sign of E if necessary
         if np.linalg.det(R1)+1.0 < 10**-8:
@@ -192,10 +214,6 @@ class DepthMap(object):
         t1 = U[:,2]
         t2 = -U[:,2]
 
-        # the first camera has a camera matrix with no translation or rotation
-        P = np.array([[1.0, 0.0, 0.0, 0.0],
-                      [0.0, 1.0, 0.0, 0.0],
-                      [0.0, 0.0, 1.0, 0.0]]);
         P1_possibilities = [np.column_stack((R1, t1)),
                             np.column_stack((R1, t2)),
                             np.column_stack((R2, t1)),
@@ -203,74 +221,86 @@ class DepthMap(object):
 
         pclouds = []
         for P1 in P1_possibilities:
-            pclouds.append(triangulate_points(im1_pts_ud_fixed, im2_pts_ud_fixed, P, P1))
+            pclouds.append(self.triangulate_points(im1_pts_ud_fixed,
+                                                   im2_pts_ud_fixed, P1))
 
         # compute the proportion of points in front of the cameras
         infront_of_camera = []
         for i in range(len(P1_possibilities)):
-            infront_of_camera.append(test_triangulation(P,pclouds[i])+test_triangulation(P1_possibilities[i],pclouds[i]))
+            infront_of_camera.append(self.test_triangulation(self.P, pclouds[i]) + \
+                                     self.test_triangulation(P1_possibilities[i], pclouds[i]))
 
         # the highest proportion of points in front of the cameras is the one we select
         best_pcloud_idx = np.argmax(infront_of_camera)
         best_pcloud = pclouds[best_pcloud_idx]
 
         # scale the depths between 0 and 1 so it is easier to visualize
-        depths = best_pcloud[:,2] - min(best_pcloud[:,2])
+        depths = best_pcloud[:, 2] - min(best_pcloud[:, 2])
         depths = depths / max(depths)
 
         return best_pcloud, depths, im1_pts, im2_pts
 
-def set_corner_threshold(thresh):
-    """ Sets the threshold to consider an interest point a corner.  The higher the value
-        the more the point must look like a corner to be considered """
-    self.corner_threshold = thresh/1000.0
+    def set_corner_threshold(self, thresh):
+        """ Sets the threshold to consider an interest point a corner.  The higher the value
+            the more the point must look like a corner to be considered """
+        self.corner_threshold = thresh/1000.0
 
-def set_ratio_threshold(thresh):
-    """ Sets the ratio of the nearest to the second nearest neighbor to consider the match a good one """
-    self.ratio_threshold = thresh/100.
+    def set_ratio_threshold(self, thresh):
+        """ Sets the ratio of the nearest to the second nearest neighbor to consider the match a good one """
+        self.ratio_threshold = thresh/100.0
 
-def set_epipolar_threshold(thresh):
-    """ Sets the maximum allowable epipolar error to be considered an inlier by RANSAC """
-    self.epipolar_threshold = exp(-10+thresh/10.0)
+    def set_epipolar_threshold(self, thresh):
+        """ Sets the maximum allowable epipolar error to be considered an inlier by RANSAC """
+        self.epipolar_threshold = exp(-10 + thresh / 10.0)
 
-def run(self):
-    im1 = cv2.imread('frame0000.jpg')
-    im2 = cv2.imread('frame0001.jpg')
+    def run(self):
+        im1 = cv2.imread(self.img1_path)
+        im2 = cv2.imread(self.img2_path)
 
-    detector = cv2.FeatureDetector_create('SIFT')
-    extractor = cv2.DescriptorExtractor_create('SIFT')
-    matcher = cv2.BFMatcher()
+        if im1 == None or im2 == None:
+            print "One of the file paths was empty"
+            return
 
-    im1_bw = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
-    im2_bw = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
+        im1_bw = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
+        im2_bw = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
 
-    compute_depths()
-    cv2.namedWindow("MYWIN")
+        cv2.namedWindow("MyWindow")
 
-    # compute the 3-d cooredinates and scaled depths for visualization
-    best_pcloud, depths, im1_pts, im2_pts = compute_depths()
+        # compute the 3-d cooredinates and scaled depths for visualization
+        best_pcloud, depths, im1_pts, im2_pts = self.compute_depths(im1, im2, im1_bw, im2_bw)
 
-    # the mouse callback will be used for epipolar lines
-    cv2.setMouseCallback("MYWIN",mouse_event,im)
+        # the mouse callback will be used for epipolar lines
+        cv2.setMouseCallback("MyWindow", self.mouse_event, im)
 
-    # create a simple UI for setting corner and ratio thresholds
-    cv2.namedWindow('UI')
-    cv2.createTrackbar('Corner Threshold', 'UI', 0, 100, set_corner_threshold)
-    cv2.createTrackbar('Ratio Threshold', 'UI', 100, 100, set_ratio_threshold)
-    cv2.createTrackbar('Epipolar Error Threshold', 'UI', 50, 100, set_epipolar_threshold)
+        # create a simple UI for setting corner and ratio thresholds
+        cv2.namedWindow('UI')
+        cv2.createTrackbar('Corner Threshold', 'UI', 0, 100,
+                           self.set_corner_threshold)
+        cv2.createTrackbar('Ratio Threshold', 'UI', 100, 100,
+                           self.set_ratio_threshold)
+        cv2.createTrackbar('Epipolar Error Threshold', 'UI', 50, 100,
+                           self.set_epipolar_threshold)
 
-    print "hit spacebar to recompute depths"
-    cv2.imshow("MYWIN",im)
-    while True:
-        for i in range(best_pcloud.shape[0]):
-            cv2.circle(im,(int(im1_pts[i,0]),int(im1_pts[i,1])),int(max(1.0,depths[i]*20.0)),(0,depths[i]*255,0),1)
+        print "hit spacebar to recompute depths"
+        cv2.imshow("MyWindow", im)
+        while True:
+            for i in range(best_pcloud.shape[0]):
+                cv2.circle(im, (int(im1_pts[i, 0]), int(im1_pts[i, 1])),
+                           int(max(1.0, depths[i] * 20.0)),
+                           (0, depths[i] * 255, 0), 1)
 
-        cv2.imshow("MYWIN",im)
-        key = cv2.waitKey(50)
-        if key != -1 and chr(key) == ' ':
-            best_pcloud, depths, im1_pts, im2_pts = compute_depths()
+            cv2.imshow("MyWindow", im)
+            key = cv2.waitKey(50)
+            if key != -1 and chr(key) == ' ':
+                best_pcloud, depths, im1_pts, im2_pts = self.compute_depths(im1, im2, im2_bw)
+            if key & 0xFF == ord('q'):
+                break
 
-    cv2.destroyAllWindows()
+        cv2.destroyAllWindows()
 
-# if __name__ == "__main__":
-#     # depth_map(cameraname, filenames)
+if __name__ == "__main__":
+    cam_path = '../cameras/lindsey_cam.p'
+    img1_path = 'ac_126_box_L/img_10.jpg'
+    img2_path = 'ac_126_box_L/img_15.jpg'
+    dm = DepthMap(cam_path, img1_path, img2_path)
+    dm.run()
