@@ -286,8 +286,7 @@ class DepthMap(object):
         while True:
             for i in range(best_pcloud.shape[0]):
                 cv2.circle(im, (int(im1_pts[i, 0]), int(im1_pts[i, 1])),
-                           int(max(1.0, depths[i] * 20.0)),
-                           (0, depths[i] * 255, 0), 1)
+                           int(max(1.0, depths[i] * 20.0)), (0, 255, 0), 1)
 
             cv2.imshow("MyWindow", im)
             key = cv2.waitKey(50)
