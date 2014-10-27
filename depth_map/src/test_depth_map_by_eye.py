@@ -3,8 +3,8 @@ import depth_map
 from random import random
 
 if __name__== '__main__':
-	camera = '../cameras/lindsey_cam.p'
-	folder = 'ac_126_floor_L'
+	camera = 'lindsey_cam.p'
+	folder = 'ac_126_box_L'
 	for i in range(10):
 		num1 = int(random()*50)
 		num2 = int(random()*50)

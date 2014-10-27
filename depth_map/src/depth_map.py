@@ -4,7 +4,9 @@ import cv2
 import pickle
 import numpy as np
 from math import exp
+import os
 
+import rospkg
 import tf
 from sensor_msgs.msg import PointCloud
 from std_msgs.msg import Header
@@ -32,8 +34,12 @@ class DepthMap(object):
         self.extractor = cv2.DescriptorExtractor_create('SIFT')
         self.matcher = cv2.BFMatcher()
 
-        self.img1_path = img1_path
-        self.img2_path = img2_path
+        pack = rospkg.RosPack()
+        package_path = pack.get_path("depth_map")
+        self.img1_path = os.path.join(package_path, "images", img1_path)
+        self.img2_path = os.path.join(package_path, "images", img2_path)
+        cam_path = os.path.join(package_path, "cameras", cam_path)
+
         cam = pickle.load( open( cam_path , 'rb'  ) )
         self.D = cam[1]
         self.K = cam[0]
@@ -318,16 +324,17 @@ class DepthMap(object):
             self.publish_points(best_pcloud, counter)
 
             key = cv2.waitKey(50)
-            if key != -1 and chr(key) == ' ':
-                best_pcloud, depths, im1_pts, im2_pts = self.compute_depths(im1, im2, im2_bw)
             if key & 0xFF == ord('q'):
                 break
+            elif key != -1 and key & 0xFF == ord(' '):
+                best_pcloud, depths, im1_pts, im2_pts = self.compute_depths(im1, im2, im2_bw)
+
             counter += 1
 
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    cam_path = '../cameras/lindsey_cam.p'
+    cam_path = 'lindsey_cam.p'
     img1_path = 'ac_126_box_L/img_10.jpg'
     img2_path = 'ac_126_box_L/img_15.jpg'
     dm = DepthMap(cam_path, img1_path, img2_path)

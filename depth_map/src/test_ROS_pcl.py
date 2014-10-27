@@ -29,7 +29,15 @@ if __name__ == '__main__':
 
     P = PointCloud()
     P.header = Header(0, 0, 'points')
-    for i in range(2):
-        P.points.append(Point32(i, i, i))
+    P.points.append(Point32(2, 0, 0)); P.points.append(Point32(3, 0, 0))
+    P.points.append(Point32(4, 0, 0)); P.points.append(Point32(5, 0, 0))
+
+    P.points.append(Point32(0, 3, 0)); P.points.append(Point32(0, 6, 0))
+    P.points.append(Point32(0, 6.5, 0)); P.points.append(Point32(0, 7, 0))
+
+    P.points.append(Point32(0, 0, 2)); P.points.append(Point32(0, 0, -2))
+    P.points.append(Point32(0, 0, 1)); P.points.append(Point32(0, 0, -1))
+    # for i in range(2):
+    #     P.points.append(Point32(i, i, i))
 
     talker(P)
