@@ -47,14 +47,16 @@ class DepthMap(object):
                            [1.0, 0.0, 0.0],
                            [0.0, 0.0, 1.0]])
 
-        self.ratio_threshold = 1.0
         self.corner_threshold = 0.0
+        self.ratio_threshold = 1.0
         self.epipolar_threshold = 0.006737946999085467
 
         self.colors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(255,0,255),(0,255,255)]
         self.pt_num = 0
         self.im1_pts = []
         self.im2_pts = []
+        # self.show_lines = True # draws lines b/t correspondences
+        self.show_lines = False # draws lines b/t correspondences
 
         self.F = np.zeros([3,4])
         self.E = np.zeros([3,4])
@@ -150,6 +152,10 @@ class DepthMap(object):
                (m.trainIdx, m.queryIdx) in good_matches_prelim:
                 good_matches.append((m.trainIdx, m.queryIdx))
 
+        if len(good_matches) == 0:
+            print "No good matches, yo!"
+            return None
+
         auto_pts1 = np.zeros((1, len(good_matches), 2))
         auto_pts2 = np.zeros((1, len(good_matches), 2))
 
@@ -169,7 +175,6 @@ class DepthMap(object):
         for i in range(auto_pts1_orig.shape[1]):
             correspondences[0].append((auto_pts1_orig[0,i,0],auto_pts1_orig[0,i,1]))
             correspondences[1].append((auto_pts2_orig[0,i,0],auto_pts2_orig[0,i,1]))
-            # TODO: plot these one by one ; put on the display
 
         im1_pts = np.zeros((len(correspondences[0]),2))
         im2_pts = np.zeros((len(correspondences[1]),2))
@@ -190,15 +195,18 @@ class DepthMap(object):
                        int(im2_pts[i, 1])), 2, (255, 0, 0), 2)
 
         # the np.array bit makes the points into a 1xn_pointsx2 numpy array since that is what undistortPoints requires
+        # TODO; DK : we haven't confirmed the undistorted points... plot them somehow?
         im1_pts_ud = cv2.undistortPoints(np.array([im1_pts]),self.K,self.D)
         im2_pts_ud = cv2.undistortPoints(np.array([im2_pts]),self.K,self.D)
 
         # since we are using undistorted points we are really computing the essential matrix
+        # TODO; DK : check E?
         self.E, mask = cv2.findFundamentalMat(im1_pts_ud, im2_pts_ud,
                                               cv2.FM_RANSAC,
                                               self.epipolar_threshold)
 
         # correct matches using the optimal triangulation method of Hartley and Zisserman
+        # TODO; DK : check corrected pts,,, also plot these somehow? plot im1_pts_ud with lines, and im_pts_fixed with differently colored lines
         im1_pts_ud_fixed, im2_pts_ud_fixed = cv2.correctMatches(self.E,
                                                                 im1_pts_ud,
                                                                 im2_pts_ud)
@@ -209,10 +217,12 @@ class DepthMap(object):
                                                    im2_pts_ud_fixed[0, i, :])
 
         # since we used undistorted points to compute F we really computed E, now we use E to get F
+        # F is just for display funsies...
         self.F = np.linalg.inv(self.K.T).dot(self.E).dot(np.linalg.inv(self.K))
         U, Sigma, V = np.linalg.svd(self.E)
 
         # these are the two possible rotations
+        # only need R for the sake of finding P1
         R1 = U.dot(self.W).dot(V)
         R2 = U.dot(self.W.T).dot(V)
 
@@ -248,6 +258,8 @@ class DepthMap(object):
 
         # the highest proportion of points in front of the cameras is the one we select
         best_pcloud_idx = np.argmax(infront_of_camera)
+        # TODO; DK : check P1?? some test calculations (for when we know what translation/rotation we used in real life)
+
         best_pcloud = pclouds[best_pcloud_idx]
 
         # scale the depths between 0 and 1 so it is easier to visualize
@@ -316,26 +328,35 @@ class DepthMap(object):
         print "hit spacebar to recompute depths"
         counter = 0
         while True:
-            for i in range(best_pcloud.shape[0]):
-                cv2.circle(im, (int(im1_pts[i, 0]), int(im1_pts[i, 1])),
-                           int(max(1.0, depths[i] * 20.0)), (0, 255, 0), 1)
+            try:
+                for i in range(best_pcloud.shape[0]):
+                    cv2.circle(im, (int(im1_pts[i, 0]), int(im1_pts[i, 1])),
+                               int(max(1.0, depths[i] * 20.0)), (0, 255, 0), 1)
 
-            cv2.imshow("MyWindow", im)
-            self.publish_points(best_pcloud, counter)
+                if self.show_lines:
+                    for i in range(len(im1_pts)):
+                        cv2.line(im,(int(im1_pts[i][0]), int(im1_pts[i][1])),(640 + int(im2_pts[i][0]), int(im2_pts[i][1])),(255,0,0))
 
-            key = cv2.waitKey(50)
-            if key & 0xFF == ord('q'):
-                break
-            elif key != -1 and key & 0xFF == ord(' '):
-                best_pcloud, depths, im1_pts, im2_pts = self.compute_depths(im1, im2, im2_bw)
+                cv2.imshow("MyWindow", im)
+                self.publish_points(best_pcloud, counter)
 
-            counter += 1
+                key = cv2.waitKey(50)
+                if key & 0xFF == ord('q'):
+                    break
+                elif key != -1 and key & 0xFF == ord(' '):
+                    best_pcloud, depths, im1_pts, im2_pts = self.compute_depths(im1, im2, im1_bw, im2_bw)
+
+                counter += 1
+            except Exception, e:
+                print e
+                print "Something was probably empty"
+
 
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     cam_path = 'lindsey_cam.p'
-    img1_path = 'ac_126_box_L/img_10.jpg'
-    img2_path = 'ac_126_box_L/img_15.jpg'
+    img1_path = 'ac_126_box_L/img_42.jpg'
+    img2_path = 'ac_126_box_L/img_37.jpg'
     dm = DepthMap(cam_path, img1_path, img2_path)
     dm.run()
