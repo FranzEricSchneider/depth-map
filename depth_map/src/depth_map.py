@@ -167,9 +167,13 @@ class DepthMap(object):
         auto_pts1_orig = auto_pts1
         auto_pts2_orig = auto_pts2
 
+        print auto_pts1
+
         # remove the effect of the intrinsic parameters as well as radial distortion
         auto_pts1 = cv2.undistortPoints(auto_pts1, self.K, self.D)
         auto_pts2 = cv2.undistortPoints(auto_pts2, self.K, self.D)
+
+        print auto_pts1
 
         correspondences = [[],[]]
         for i in range(auto_pts1_orig.shape[1]):
@@ -210,6 +214,28 @@ class DepthMap(object):
         im1_pts_ud_fixed, im2_pts_ud_fixed = cv2.correctMatches(self.E,
                                                                 im1_pts_ud,
                                                                 im2_pts_ud)
+
+        M, mask = cv2.findHomography(auto_pts1_orig, auto_pts2_orig, cv2.RANSAC)
+        h, w, c = im1.shape
+        pts = np.float32([ [20,20], [20, h-21], [w-21, h-21], [w-21, 20] ]).reshape(-1, 1, 2)
+        dst = cv2.perspectiveTransform(pts,M)
+
+        # visualizing some homography things!
+        # print pts
+        # print dst
+        for pt in pts:
+            cv2.circle(im, (pt[0,0], pt[0,1]), 2, (0, 0, 255) , 20)
+        for pt in dst:
+            cv2.circle(im, (int(pt[0,0])+w, int(pt[0,1])), 2, (0, 255, 0) , 20)
+
+        for i in range(4):
+            if not i == 3:
+                cv2.line(im, (pts[i,0,0],pts[i,0,1]), (pts[i+1,0,0],pts[i+1,0,1]), (0,0,255), 2)
+                cv2.line(im, (int(dst[i,0,0])+w,dst[i,0,1]), (int(dst[i+1,0,0])+w,dst[i+1,0,1]), (0,255,0), 2)
+            else:
+                cv2.line(im, (pts[i,0,0],pts[i,0,1]), (pts[0,0,0],pts[0,0,1]), (0,0,255), 2)
+                cv2.line(im, (int(dst[i,0,0])+w,dst[i,0,1]), (int(dst[0,0,0])+w,dst[0,0,1]), (0,255,0), 2)
+
 
         epipolar_error = np.zeros((im1_pts_ud_fixed.shape[1],))
         for i in range(im1_pts_ud_fixed.shape[1]):
@@ -355,7 +381,7 @@ class DepthMap(object):
 
 if __name__ == "__main__":
     cam_path = 'lindsey_cam.p'
-    img1_path = 'ac_126_box_L/img_42.jpg'
-    img2_path = 'ac_126_box_L/img_37.jpg'
+    img1_path = 'ac_126_floor_L/img_30.jpg'
+    img2_path = 'ac_126_floor_L/img_25.jpg'
     dm = DepthMap(cam_path, img1_path, img2_path)
     dm.run()
