@@ -4,12 +4,13 @@ from glob import glob
 from time import sleep
 
 camera = 1
-folder = "ac_126"
+folder = "library_translation_in_L"
 
 cap = cv2.VideoCapture(camera)
 test_imgs = []
 good = 0
-to_capture = 50
+to_capture = 20
+sleep(1)
 while good <= to_capture:
     ret, frame = cap.read()
     cv2.imshow('frame', frame)
@@ -17,7 +18,7 @@ while good <= to_capture:
     fname = '../images/%s/img_%d.jpg' %(folder, good)
     cv2.imwrite(fname, frame)
     print "I just wrote img_%d to %s" %(good, fname)
-    sleep(0.05)
+    sleep(0.25)
     good +=1
 
 cv2.destroyWindow('frame')

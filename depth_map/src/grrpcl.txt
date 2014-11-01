@@ -1,0 +1,10 @@
+install things... 
+http://pointclouds.org/downloads/linux.html
+http://docs.cython.org/src/quickstart/install.html
+http://www.20papercups.net/programming/kinect-on-ubuntu-with-openni/
+
+plan:
+install stuff
+play with demos
+try to get a 3d point cloud of one of our images from lindsey or graham cam
+ask franz about the rviz stuff

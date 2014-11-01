@@ -345,7 +345,6 @@ class DepthMap(object):
                     break
                 elif key != -1 and key & 0xFF == ord(' '):
                     best_pcloud, depths, im1_pts, im2_pts = self.compute_depths(im1, im2, im1_bw, im2_bw)
-
                 counter += 1
             except Exception, e:
                 print e
