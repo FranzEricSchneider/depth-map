@@ -8,7 +8,7 @@ import os
 
 import rospkg
 import tf
-from sensor_msgs.msg import PointCloud
+from sensor_msgs.msg import PointCloud, ChannelFloat32
 from std_msgs.msg import Header
 from geometry_msgs.msg import Point32
 
@@ -285,8 +285,27 @@ class DepthMap(object):
         # the highest proportion of points in front of the cameras is the one we select
         best_pcloud_idx = np.argmax(infront_of_camera)
         # TODO; DK : check P1?? some test calculations (for when we know what translation/rotation we used in real life)
+        #       We've tried to check P1 by plotting the homography translation of one camera plane to the next
 
         best_pcloud = pclouds[best_pcloud_idx]
+
+        # filtering before publishing things into rviz
+
+        negatives = [] # list of indices of points with negative z values (to be passed into np.delete)        
+        for i in range(len(best_pcloud[:,2])):
+            if best_pcloud[:,2][i] <= 0:
+                negatives.append(i)
+        best_pcloud = np.delete(best_pcloud, negatives, 0)
+
+        outliers = [] # waytoofar
+        mean = np.mean(best_pcloud[:,2]) # filtering against the mean assumes that the pts of interest are all close to each other
+                                         # this mean is still affected by the faraway outliers 
+        outlier_threshold = 5*mean
+
+        for i in range(len(best_pcloud[:,2])):
+            if best_pcloud[:,2][i] >= outlier_threshold:
+                outliers.append(i)
+        best_pcloud = np.delete(best_pcloud, outliers, 0)
 
         # scale the depths between 0 and 1 so it is easier to visualize
         depths = best_pcloud[:, 2] - min(best_pcloud[:, 2])
@@ -381,7 +400,7 @@ class DepthMap(object):
 
 if __name__ == "__main__":
     cam_path = 'lindsey_cam.p'
-    img1_path = 'ac_126_floor_L/img_30.jpg'
-    img2_path = 'ac_126_floor_L/img_25.jpg'
+    img1_path = 'library_translation_side_L/img_2.jpg'
+    img2_path = 'library_translation_side_L/img_13.jpg'
     dm = DepthMap(cam_path, img1_path, img2_path)
     dm.run()
