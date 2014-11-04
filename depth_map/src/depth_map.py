@@ -56,7 +56,7 @@ class DepthMap(object):
         self.pt_num = 0
         self.im1_pts = []
         self.im2_pts = []
-        self.show_lines = True # draws lines b/t correspondences
+        self.show_lines = False # draws lines b/t correspondences
         self.show_homography = False # draws lines b/t cameras
 
         self.F = np.zeros([3,4])
@@ -427,7 +427,7 @@ class DepthMap(object):
 
 if __name__ == "__main__":
     cam_path = 'lindsey_cam.p'
-    img1_path = 'library_translation_side_L/img_2.jpg'
-    img2_path = 'library_translation_side_L/img_13.jpg'
+    img1_path = 'library_translation_side_L/img_20.jpg'
+    img2_path = 'library_translation_side_L/img_2.jpg'
     dm = DepthMap(cam_path, img1_path, img2_path)
     dm.run()
