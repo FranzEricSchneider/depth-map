@@ -3,8 +3,9 @@ import rospy
 import cv2
 import pickle
 import numpy as np
-from math import exp
+from math import exp, atan, pi
 import os
+import colorsys
 
 import rospkg
 import tf
@@ -55,8 +56,8 @@ class DepthMap(object):
         self.pt_num = 0
         self.im1_pts = []
         self.im2_pts = []
-        # self.show_lines = True # draws lines b/t correspondences
-        self.show_lines = False # draws lines b/t correspondences
+        self.show_lines = True # draws lines b/t correspondences
+        self.show_homography = False # draws lines b/t cameras
 
         self.F = np.zeros([3,4])
         self.E = np.zeros([3,4])
@@ -167,13 +168,9 @@ class DepthMap(object):
         auto_pts1_orig = auto_pts1
         auto_pts2_orig = auto_pts2
 
-        print auto_pts1
-
         # remove the effect of the intrinsic parameters as well as radial distortion
         auto_pts1 = cv2.undistortPoints(auto_pts1, self.K, self.D)
         auto_pts2 = cv2.undistortPoints(auto_pts2, self.K, self.D)
-
-        print auto_pts1
 
         correspondences = [[],[]]
         for i in range(auto_pts1_orig.shape[1]):
@@ -194,9 +191,9 @@ class DepthMap(object):
             im2_pts[i,1] = correspondences[1][i][1]
 
             cv2.circle(im, (int(im1_pts[i, 0]), int(im1_pts[i, 1])), 2,
-                       (255, 0, 0), 2)
+                       (255, 0, 0), 5)
             cv2.circle(im, (int(im2_pts[i, 0] + im1.shape[1]),
-                       int(im2_pts[i, 1])), 2, (255, 0, 0), 2)
+                       int(im2_pts[i, 1])), 2, (255, 0, 0), 5)
 
         # the np.array bit makes the points into a 1xn_pointsx2 numpy array since that is what undistortPoints requires
         # TODO; DK : we haven't confirmed the undistorted points... plot them somehow?
@@ -216,26 +213,9 @@ class DepthMap(object):
                                                                 im2_pts_ud)
 
         M, mask = cv2.findHomography(auto_pts1_orig, auto_pts2_orig, cv2.RANSAC)
-        h, w, c = im1.shape
-        pts = np.float32([ [20,20], [20, h-21], [w-21, h-21], [w-21, 20] ]).reshape(-1, 1, 2)
-        dst = cv2.perspectiveTransform(pts,M)
 
-        # visualizing some homography things!
-        # print pts
-        # print dst
-        for pt in pts:
-            cv2.circle(im, (pt[0,0], pt[0,1]), 2, (0, 0, 255) , 20)
-        for pt in dst:
-            cv2.circle(im, (int(pt[0,0])+w, int(pt[0,1])), 2, (0, 255, 0) , 20)
-
-        for i in range(4):
-            if not i == 3:
-                cv2.line(im, (pts[i,0,0],pts[i,0,1]), (pts[i+1,0,0],pts[i+1,0,1]), (0,0,255), 2)
-                cv2.line(im, (int(dst[i,0,0])+w,dst[i,0,1]), (int(dst[i+1,0,0])+w,dst[i+1,0,1]), (0,255,0), 2)
-            else:
-                cv2.line(im, (pts[i,0,0],pts[i,0,1]), (pts[0,0,0],pts[0,0,1]), (0,0,255), 2)
-                cv2.line(im, (int(dst[i,0,0])+w,dst[i,0,1]), (int(dst[0,0,0])+w,dst[0,0,1]), (0,255,0), 2)
-
+        if self.show_homography:
+            self.find_and_display_homography(im1, M)
 
         epipolar_error = np.zeros((im1_pts_ud_fixed.shape[1],))
         for i in range(im1_pts_ud_fixed.shape[1]):
@@ -329,6 +309,59 @@ class DepthMap(object):
                  'points',
                  'map')
 
+    def find_and_display_homography(self, im1, M):
+        h, w, c = im1.shape
+        cam0_edge_pts = np.float32([ [20,20], [20, h-21], [w-21, h-21], [w-21, 20] ]).reshape(-1, 1, 2)
+        cam0_on_cam1 = cv2.perspectiveTransform(cam0_edge_pts, M)
+
+        # visualizing some homography things!
+        # print cam0_edge_pts
+        # print cam0_on_cam1
+        for pt in cam0_edge_pts:
+            cv2.circle(im, (pt[0,0], pt[0,1]), 2, (0, 0, 255) , 20)
+        for pt in cam0_on_cam1:
+            cv2.circle(im, (int(pt[0, 0]) + w, int(pt[0, 1])), 2, (0, 255, 0) , 20)
+
+        for i in range(4):
+            if not i == 3:
+                cv2.line(im, (cam0_edge_pts[i, 0, 0], cam0_edge_pts[i, 0, 1]),
+                         (cam0_edge_pts[i + 1, 0, 0], cam0_edge_pts[i + 1, 0, 1]),
+                         (0, 0, 255), 2)
+                cv2.line(im, (int(cam0_on_cam1[i, 0, 0]) + w, cam0_on_cam1[i, 0, 1]),
+                         (int(cam0_on_cam1[i + 1, 0, 0]) + w, cam0_on_cam1[i + 1, 0, 1]),
+                         (0, 255, 0), 2)
+            else:
+                cv2.line(im, (cam0_edge_pts[i, 0, 0], cam0_edge_pts[i, 0, 1]),
+                         (cam0_edge_pts[0, 0, 0], cam0_edge_pts[0, 0, 1]),
+                         (0, 0, 255), 2)
+                cv2.line(im, (int(cam0_on_cam1[i, 0, 0]) + w, cam0_on_cam1[i, 0, 1]),
+                         (int(cam0_on_cam1[0, 0, 0]) + w, cam0_on_cam1[0, 0, 1]),
+                         (0,255,0), 2)
+
+    def display_corr_lines(self, im1_pts, im2_pts):
+        w = 640  # Width in pixels of our images
+        h = 480  # Height in px of our images
+        cv2.line(im, (w, 0), (w, h), (0, 0, 0), 4)
+
+        if self.show_lines:
+            for i in range(len(im1_pts)):
+                x1 = im1_pts[i][0]
+                y1 = im1_pts[i][1]
+                x2 = im2_pts[i][0]
+                y2 = im2_pts[i][1]
+
+                value = atan((y2 - y1) / (x2 - x1)) / (pi / 2.0)
+                color = self.get_angle_color(abs(value))
+                cv2.line(im, (int(x1), int(y1)), (w + int(x2), int(y2)), color)
+
+    def get_angle_color(self, value):
+        float_tuple = colorsys.hsv_to_rgb(value, 1.0, 0.8)
+        full_tuple = (int(float_tuple[0]*255),
+                      int(float_tuple[1]*255),
+                      int(float_tuple[2]*255))
+        return full_tuple
+
+
     def set_corner_threshold(self, thresh):
         """ Sets the threshold to consider an interest point a corner.  The higher the value
             the more the point must look like a corner to be considered """
@@ -374,13 +407,7 @@ class DepthMap(object):
         counter = 0
         while True:
             try:
-                for i in range(best_pcloud.shape[0]):
-                    cv2.circle(im, (int(im1_pts[i, 0]), int(im1_pts[i, 1])),
-                               int(max(1.0, depths[i] * 20.0)), (0, 255, 0), 1)
-
-                if self.show_lines:
-                    for i in range(len(im1_pts)):
-                        cv2.line(im,(int(im1_pts[i][0]), int(im1_pts[i][1])),(640 + int(im2_pts[i][0]), int(im2_pts[i][1])),(255,0,0))
+                self.display_corr_lines(im1_pts, im2_pts)
 
                 cv2.imshow("MyWindow", im)
                 self.publish_points(best_pcloud, counter)
