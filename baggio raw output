@@ -1,0 +1,508 @@
+-> img_34.jpg
+ Triangulate img_42.jpg and img_34.jpg
+Triangulating...Done. (1526points, 0.0334846s, mean reproj err = 0.495575)
+triangulation reproj error 0.495575
+1523/1526 = 99.8034% are in front of camera
+1523/1526 = 99.8034% are in front of camera
+filtered out 9 high-error points
+1145/1517 points were found in other views, adding 372 new
+before triangulation: 2196 after 2568
+ -> img_22.jpg
+ Triangulate img_42.jpg and img_22.jpg
+Triangulating...Done. (777points, 0.0168655s, mean reproj err = 2.95534)
+triangulation reproj error 2.95534
+744/777 = 95.7529% are in front of camera
+744/777 = 95.7529% are in front of camera
+filtered out 50 high-error points
+638/727 points were found in other views, adding 89 new
+before triangulation: 2568 after 2657
+======================== Bundle Adjustment ==========================
+N (cams) = 6 M (points) = 2657 K (measurements) = 7651
+intrinsic before bundle = [ 545.403 0 345.188 
+0 546.094 250.79 
+0 0 1 ]
+Read the 3D points.
+Read the cameras.
+Read 5540 valid 2D measurements.
+mean reprojection error (in pixels): 3.80839
+K0 = [ 1 0 0.632905 
+0 1.00127 0.459826 
+0 0 1 ]
+optimizer status = 0
+refined K = [ 0.971657 0 0.708993 
+0 0.972887 0.447883 
+0 0 1 ]
+Knew = [ 529.945 0 386.687 
+0 530.616 244.277 
+0 0 1 ]
+mean reprojection error (in pixels): 0.679406
+use new K 
+[529.9446372663298, 0, 386.6868489598102;
+  0, 530.6157429507901, 244.2766506818415;
+  0, 0, 1]
+Creating point cloud...Done. (0.000520356s)
+Creating point cloud...Done. (0.000557842s)
+Show cloud: show cloud A
+img_41.jpg: showing 7 cameras
+showing 7 lines
+found 2247 3d-2d point correspondences
+img_32.jpg: found 2130 3d-2d point correspondences
+img_44.jpg: found 2082 3d-2d point correspondences
+img_31.jpg: found 2081 3d-2d point correspondences
+img_23.jpg: found 1578 3d-2d point correspondences
+img_24.jpg: found 1747 3d-2d point correspondences
+img_33.jpg: found 2100 3d-2d point correspondences
+-------------------------- img_41.jpg --------------------------
+found t = [0.2221299683466259;
+  0.4472102132670007;
+  -1.994280124752914]
+R = 
+[0.9985068892403589, 0.002712928224926355, -0.05455852050769084;
+  -0.00158989513863935, 0.9997861852210813, 0.02061688809024819;
+  0.05460278722730055, -0.02049936246628379, 0.9982977069819834]
+ -> img_43.jpg
+ Triangulate img_41.jpg and img_43.jpg
+Triangulating...Done. (1589points, 0.0344748s, mean reproj err = 0.513647)
+triangulation reproj error 0.513647
+1584/1589 = 99.6853% are in front of camera
+1584/1589 = 99.6853% are in front of camera
+filtered out 10 high-error points
+1382/1579 points were found in other views, adding 197 new
+before triangulation: 2657 after 2854
+ -> img_34.jpg
+ Triangulate img_41.jpg and img_34.jpg
+Triangulating...Done. (1515points, 0.0324876s, mean reproj err = 1.75538)
+triangulation reproj error 1.75538
+1431/1515 = 94.4554% are in front of camera
+1431/1515 = 94.4554% are in front of camera
+filtered out 134 high-error points
+1281/1381 points were found in other views, adding 100 new
+before triangulation: 2854 after 2954
+ -> img_22.jpg
+ Triangulate img_41.jpg and img_22.jpg
+Triangulating...Done. (798points, 0.0171358s, mean reproj err = 0.712771)
+triangulation reproj error 0.712771
+782/798 = 97.995% are in front of camera
+782/798 = 97.995% are in front of camera
+filtered out 19 high-error points
+740/779 points were found in other views, adding 39 new
+before triangulation: 2954 after 2993
+ -> img_42.jpg
+ Triangulate img_41.jpg and img_42.jpg
+Triangulating...Done. (1664points, 0.0353883s, mean reproj err = 0.988376)
+triangulation reproj error 0.988376
+4/1664 = 0.240385% are in front of camera
+Triangulation did not succeed
+======================== Bundle Adjustment ==========================
+N (cams) = 7 M (points) = 2993 K (measurements) = 10883
+intrinsic before bundle = [ 529.945 0 386.687 
+0 530.616 244.277 
+0 0 1 ]
+Read the 3D points.
+Read the cameras.
+Read 8772 valid 2D measurements.
+mean reprojection error (in pixels): 3.15398
+K0 = [ 1 0 0.729674 
+0 1.00127 0.460947 
+0 0 1 ]
+optimizer status = 0
+refined K = [ 0.983763 0 0.71171 
+0 0.985009 0.478801 
+0 0 1 ]
+Knew = [ 521.34 0 377.167 
+0 522 253.738 
+0 0 1 ]
+mean reprojection error (in pixels): 0.999562
+use new K 
+[521.3399115612032, 0, 377.1667306807726;
+  0, 522.0001204841382, 253.7381883985283;
+  0, 0, 1]
+Creating point cloud...Done. (0.000596141s)
+Creating point cloud...Done. (0.000586681s)
+Show cloud: show cloud A
+img_32.jpg: showing 8 cameras
+showing 8 lines
+found 2415 3d-2d point correspondences
+img_44.jpg: found 2368 3d-2d point correspondences
+img_31.jpg: found 2389 3d-2d point correspondences
+img_23.jpg: found 1782 3d-2d point correspondences
+img_24.jpg: found 1954 3d-2d point correspondences
+img_33.jpg: found 2349 3d-2d point correspondences
+-------------------------- img_32.jpg --------------------------
+found t = [0.3060755926623018;
+  0.3466637188433371;
+  -5.112608975279904]
+R = 
+[0.9993857781880084, -0.01454155183315255, -0.03188431629865177;
+  0.01536480607493618, 0.9995508727946967, 0.02572888317902136;
+  0.03149585829642268, -0.02620297627453534, 0.999160354970376]
+ -> img_43.jpg
+ Triangulate img_32.jpg and img_43.jpg
+Triangulating...Done. (1360points, 0.029184s, mean reproj err = 3.56902)
+triangulation reproj error 3.56902
+1253/1360 = 92.1324% are in front of camera
+1251/1360 = 91.9853% are in front of camera
+filtered out 116 high-error points
+1188/1244 points were found in other views, adding 56 new
+before triangulation: 2993 after 3049
+ -> img_41.jpg
+ Triangulate img_32.jpg and img_41.jpg
+Triangulating...Done. (1421points, 0.0310272s, mean reproj err = 3.51726)
+triangulation reproj error 3.51726
+1308/1421 = 92.0479% are in front of camera
+1308/1421 = 92.0479% are in front of camera
+filtered out 122 high-error points
+1213/1299 points were found in other views, adding 86 new
+before triangulation: 3049 after 3135
+ -> img_34.jpg
+ Triangulate img_32.jpg and img_34.jpg
+Triangulating...Done. (1569points, 0.0335694s, mean reproj err = 10.7856)
+triangulation reproj error 10.7856
+1070/1569 = 68.1963% are in front of camera
+Triangulation did not succeed
+ -> img_22.jpg
+ Triangulate img_32.jpg and img_22.jpg
+Triangulating...Done. (858points, 0.018135s, mean reproj err = 3.92865)
+triangulation reproj error 3.92865
+823/858 = 95.9207% are in front of camera
+822/858 = 95.8042% are in front of camera
+filtered out 41 high-error points
+784/817 points were found in other views, adding 33 new
+before triangulation: 3135 after 3168
+ -> img_42.jpg
+ Triangulate img_32.jpg and img_42.jpg
+Triangulating...Done. (1324points, 0.028548s, mean reproj err = 29.173)
+triangulation reproj error 29.173
+1123/1324 = 84.8187% are in front of camera
+1059/1324 = 79.9849% are in front of camera
+filtered out 426 high-error points
+846/898 points were found in other views, adding 52 new
+before triangulation: 3168 after 3220
+======================== Bundle Adjustment ==========================
+N (cams) = 8 M (points) = 3220 K (measurements) = 13983
+intrinsic before bundle = [ 521.34 0 377.167 
+0 522 253.738 
+0 0 1 ]
+Read the 3D points.
+Read the cameras.
+Read 11600 valid 2D measurements.
+mean reprojection error (in pixels): 3.20045
+K0 = [ 1 0 0.723456 
+0 1.00127 0.486704 
+0 0 1 ]
+optimizer status = 1
+refined K = [ 0.998516 0 0.721082 
+0 0.99978 0.487911 
+0 0 1 ]
+Knew = [ 520.566 0 375.929 
+0 521.225 254.367 
+0 0 1 ]
+mean reprojection error (in pixels): 1.18172
+use new K 
+[520.5661624772707, 0, 375.9287792884638;
+  0, 521.225391548025, 254.3673499368788;
+  0, 0, 1]
+Creating point cloud...Done. (0.000591577s)
+Creating point cloud...Done. (0.000617646s)
+Show cloud: show cloud A
+img_44.jpg: showing 9 cameras
+showing 9 lines
+found 2560 3d-2d point correspondences
+img_31.jpg: found 2594 3d-2d point correspondences
+img_23.jpg: found 1960 3d-2d point correspondences
+img_24.jpg: found 2123 3d-2d point correspondences
+img_33.jpg: found 2583 3d-2d point correspondences
+-------------------------- img_31.jpg --------------------------
+found t = [0.5723539998395962;
+  0.4045517800772948;
+  -5.539571316350003]
+R = 
+[0.9975391758563098, -0.01872364243184132, -0.06756491579213791;
+  0.02012443422189626, 0.9995951803605229, 0.02011175147177003;
+  0.06716099894405017, -0.02142196569174324, 0.9975121551172893]
+ -> img_43.jpg
+ Triangulate img_31.jpg and img_43.jpg
+Triangulating...Done. (1350points, 0.0293836s, mean reproj err = 3.09611)
+triangulation reproj error 3.09611
+1211/1350 = 89.7037% are in front of camera
+1213/1350 = 89.8519% are in front of camera
+filtered out 148 high-error points
+1163/1202 points were found in other views, adding 39 new
+before triangulation: 3220 after 3259
+ -> img_41.jpg
+ Triangulate img_31.jpg and img_41.jpg
+Triangulating...Done. (1487points, 0.032349s, mean reproj err = 2.56691)
+triangulation reproj error 2.56691
+1225/1487 = 82.3806% are in front of camera
+1227/1487 = 82.5151% are in front of camera
+filtered out 265 high-error points
+1173/1222 points were found in other views, adding 49 new
+before triangulation: 3259 after 3308
+ -> img_32.jpg
+ Triangulate img_31.jpg and img_32.jpg
+Triangulating...Done. (1626points, 0.0352164s, mean reproj err = 3.46447)
+triangulation reproj error 3.46447
+1626/1626 = 100% are in front of camera
+1626/1626 = 100% are in front of camera
+filtered out 163 high-error points
+1313/1463 points were found in other views, adding 150 new
+before triangulation: 3308 after 3458
+ -> img_34.jpg
+ Triangulate img_31.jpg and img_34.jpg
+Triangulating...Done. (1501points, 0.0329873s, mean reproj err = 9.71471)
+triangulation reproj error 9.71471
+1255/1501 = 83.6109% are in front of camera
+1280/1501 = 85.2765% are in front of camera
+filtered out 267 high-error points
+1201/1234 points were found in other views, adding 33 new
+before triangulation: 3458 after 3491
+ -> img_22.jpg
+ Triangulate img_31.jpg and img_22.jpg
+Triangulating...Done. (951points, 0.0204386s, mean reproj err = 1.38603)
+triangulation reproj error 1.38603
+938/951 = 98.633% are in front of camera
+938/951 = 98.633% are in front of camera
+filtered out 20 high-error points
+890/931 points were found in other views, adding 41 new
+before triangulation: 3491 after 3532
+ -> img_42.jpg
+ Triangulate img_31.jpg and img_42.jpg
+Triangulating...Done. (1402points, 0.0303378s, mean reproj err = 16.0532)
+triangulation reproj error 16.0532
+612/1402 = 43.6519% are in front of camera
+Triangulation did not succeed
+======================== Bundle Adjustment ==========================
+N (cams) = 9 M (points) = 3532 K (measurements) = 17562
+intrinsic before bundle = [ 520.566 0 375.929 
+0 521.225 254.367 
+0 0 1 ]
+Read the 3D points.
+Read the cameras.
+Read 15179 valid 2D measurements.
+mean reprojection error (in pixels): 2.89451
+K0 = [ 1 0 0.722154 
+0 1.00127 0.488636 
+0 0 1 ]
+optimizer status = 0
+refined K = [ 0.997911 0 0.724647 
+0 0.999174 0.490035 
+0 0 1 ]
+Knew = [ 519.478 0 377.227 
+0 520.136 255.096 
+0 0 1 ]
+mean reprojection error (in pixels): 1.44098
+use new K 
+[519.4784976948768, 0, 377.2266065942305;
+  0, 520.1363493802081, 255.0958330523258;
+  0, 0, 1]
+Creating point cloud...Done. (0.000676452s)
+Creating point cloud...Done. (0.000675101s)
+Show cloud: show cloud A
+img_44.jpg: showing 10 cameras
+showing 10 lines
+found 2744 3d-2d point correspondences
+img_23.jpg: found 2175 3d-2d point correspondences
+img_24.jpg: found 2361 3d-2d point correspondences
+img_33.jpg: found 2883 3d-2d point correspondences
+-------------------------- img_33.jpg --------------------------
+found t = [-0.4614835713691519;
+  -0.3772784782305502;
+  -7.211561968186467]
+R = 
+[-0.9989941745465235, 0.0112918830637795, 0.04339507574580467;
+  -0.01237418082182641, -0.9996170007282288, -0.0247534139885584;
+  0.04309894280720745, -0.02526549488876371, 0.9987512883080185]
+ -> img_43.jpg
+ Triangulate img_33.jpg and img_43.jpg
+Triangulating...Done. (1359points, 0.0290626s, mean reproj err = 5.60006)
+triangulation reproj error 5.60006
+1358/1359 = 99.9264% are in front of camera
+1/1359 = 0.0735835% are in front of camera
+Triangulation did not succeed
+ -> img_41.jpg
+ Triangulate img_33.jpg and img_41.jpg
+Triangulating...Done. (1286points, 0.0273119s, mean reproj err = 4.76604)
+triangulation reproj error 4.76604
+1286/1286 = 100% are in front of camera
+0/1286 = 0% are in front of camera
+Triangulation did not succeed
+ -> img_32.jpg
+ Triangulate img_33.jpg and img_32.jpg
+Triangulating...Done. (1606points, 0.0339417s, mean reproj err = 0.738801)
+triangulation reproj error 0.738801
+1605/1606 = 99.9377% are in front of camera
+0/1606 = 0% are in front of camera
+Triangulation did not succeed
+ -> img_34.jpg
+ Triangulate img_33.jpg and img_34.jpg
+Triangulating...Done. (1620points, 0.0342793s, mean reproj err = 1.53079)
+triangulation reproj error 1.53079
+1620/1620 = 100% are in front of camera
+0/1620 = 0% are in front of camera
+Triangulation did not succeed
+ -> img_22.jpg
+ Triangulate img_33.jpg and img_22.jpg
+Triangulating...Done. (881points, 0.0185027s, mean reproj err = 17.2766)
+triangulation reproj error 17.2766
+834/881 = 94.6652% are in front of camera
+10/881 = 1.13507% are in front of camera
+Triangulation did not succeed
+ -> img_31.jpg
+ Triangulate img_33.jpg and img_31.jpg
+Triangulating...Done. (1590points, 0.0339302s, mean reproj err = 1.34833)
+triangulation reproj error 1.34833
+1589/1590 = 99.9371% are in front of camera
+1/1590 = 0.0628931% are in front of camera
+Triangulation did not succeed
+ -> img_42.jpg
+ Triangulate img_33.jpg and img_42.jpg
+Triangulating...Done. (1404points, 0.0297878s, mean reproj err = 11.3298)
+triangulation reproj error 11.3298
+1403/1404 = 99.9288% are in front of camera
+6/1404 = 0.42735% are in front of camera
+Triangulation did not succeed
+======================== Bundle Adjustment ==========================
+N (cams) = 11 M (points) = 3532 K (measurements) = 17562
+intrinsic before bundle = [ 519.478 0 377.227 
+0 520.136 255.096 
+0 0 1 ]
+Read the 3D points.
+Read the cameras.
+Read 17562 valid 2D measurements.
+mean reprojection error (in pixels): 17.7627
+K0 = [ 1 0 0.726164 
+0 1.00127 0.491061 
+0 0 1 ]
+optimizer status = 0
+refined K = [ 0.999192 0 0.726753 
+0 1.00046 0.490923 
+0 0 1 ]
+Knew = [ 519.059 0 377.532 
+0 519.716 255.024 
+0 0 1 ]
+mean reprojection error (in pixels): 1.51423
+use new K 
+[519.0589753292944, 0, 377.5323083970503;
+  0, 519.7162957443298, 255.0236953111168;
+  0, 0, 1]
+Creating point cloud...Done. (0.000708756s)
+Creating point cloud...Done. (0.000670981s)
+Show cloud: show cloud A
+img_44.jpg: showing 11 cameras
+showing 11 lines
+found 2744 3d-2d point correspondences
+img_23.jpg: found 2175 3d-2d point correspondences
+img_24.jpg: found 2361 3d-2d point correspondences
+-------------------------- img_44.jpg --------------------------
+found t = [0.6319098737305557;
+  0.4001103990740679;
+  -6.167442785718146]
+R = 
+[0.9973043305397897, 0.002745729545160808, -0.07332484746555328;
+  -0.001283371511967294, 0.999799491705758, 0.0199832265280229;
+  0.07336501376094802, -0.0198352553341982, 0.9971078865407108]
+ -> img_43.jpg
+ Triangulate img_44.jpg and img_43.jpg
+Triangulating...Done. (1496points, 0.0321348s, mean reproj err = 9.46391)
+triangulation reproj error 9.46391
+737/1496 = 49.2647% are in front of camera
+Triangulation did not succeed
+ -> img_41.jpg
+ Triangulate img_44.jpg and img_41.jpg
+Triangulating...Done. (1524points, 0.033373s, mean reproj err = 8.04678)
+triangulation reproj error 8.04678
+826/1524 = 54.1995% are in front of camera
+Triangulation did not succeed
+ -> img_32.jpg
+ Triangulate img_44.jpg and img_32.jpg
+Triangulating...Done. (1338points, 0.0284885s, mean reproj err = 6.75028)
+triangulation reproj error 6.75028
+1209/1338 = 90.3587% are in front of camera
+1222/1338 = 91.3303% are in front of camera
+filtered out 187 high-error points
+1125/1151 points were found in other views, adding 26 new
+before triangulation: 3532 after 3558
+ -> img_34.jpg
+ Triangulate img_44.jpg and img_34.jpg
+Triangulating...Done. (1287points, 0.0273063s, mean reproj err = 23.9931)
+triangulation reproj error 23.9931
+1085/1287 = 84.3046% are in front of camera
+1133/1287 = 88.0342% are in front of camera
+filtered out 260 high-error points
+1010/1027 points were found in other views, adding 17 new
+before triangulation: 3558 after 3575
+ -> img_22.jpg
+ Triangulate img_44.jpg and img_22.jpg
+Triangulating...Done. (741points, 0.0160059s, mean reproj err = 3.8365)
+triangulation reproj error 3.8365
+692/741 = 93.3873% are in front of camera
+692/741 = 93.3873% are in front of camera
+filtered out 52 high-error points
+678/689 points were found in other views, adding 11 new
+before triangulation: 3575 after 3586
+ -> img_31.jpg
+ Triangulate img_44.jpg and img_31.jpg
+Triangulating...Done. (1254points, 0.0270314s, mean reproj err = 8.68366)
+triangulation reproj error 8.68366
+1193/1254 = 95.1356% are in front of camera
+1213/1254 = 96.7305% are in front of camera
+filtered out 98 high-error points
+1132/1156 points were found in other views, adding 24 new
+before triangulation: 3586 after 3610
+ -> img_33.jpg
+ Triangulate img_44.jpg and img_33.jpg
+Triangulating...Done. (1365points, 0.0299167s, mean reproj err = 13.4261)
+triangulation reproj error 13.4261
+7/1365 = 0.512821% are in front of camera
+Triangulation did not succeed
+ -> img_42.jpg
+ Triangulate img_44.jpg and img_42.jpg
+Triangulating...Done. (1547points, 0.0331365s, mean reproj err = 12.5424)
+triangulation reproj error 12.5424
+819/1547 = 52.9412% are in front of camera
+Triangulation did not succeed
+======================== Bundle Adjustment ==========================
+N (cams) = 11 M (points) = 3610 K (measurements) = 20175
+intrinsic before bundle = [ 519.059 0 377.532 
+0 519.716 255.024 
+0 0 1 ]
+Read the 3D points.
+Read the cameras.
+Read 20175 valid 2D measurements.
+mean reprojection error (in pixels): 3.01938
+K0 = [ 1 0 0.72734 
+0 1.00127 0.491319 
+0 0 1 ]
+optimizer status = 0
+refined K = [ 0.999303 0 0.728445 
+0 1.00057 0.490871 
+0 0 1 ]
+Knew = [ 518.697 0 378.106 
+0 519.354 254.791 
+0 0 1 ]
+mean reprojection error (in pixels): 1.61981
+use new K 
+[518.6972154435366, 0, 378.1059100165695;
+  0, 519.3540777369143, 254.7909650019791;
+  0, 0, 1]
+Creating point cloud...Done. (0.000607196s)
+Creating point cloud...Done. (0.000661842s)
+Show cloud: show cloud A
+img_23.jpg: showing 11 cameras
+showing 11 lines
+found 2243 3d-2d point correspondences
+img_24.jpg: found 2442 3d-2d point correspondences
+-------------------------- img_24.jpg --------------------------
+not enough inliers to consider a good pose (315/2442)
+img_23.jpg: found 2243 3d-2d point correspondences
+-------------------------- img_23.jpg --------------------------
+not enough inliers to consider a good pose (251/2243)
+======================================================================
+========================= Depth Recovery DONE ========================
+======================================================================
+Creating point cloud...Done. (0.000649782s)
+Creating point cloud...Done. (0.000690226s)
+Show cloud: show cloud A
+showing 11 cameras
+showing 11 lines
+
